@@ -1,0 +1,8 @@
+  api_sets_create            POST       ANY      ANY    <href=>/api/sets/create
+  api_sets                   GET        ANY      ANY    <href=>/api/sets
+  api_sets_update            PUT        ANY      ANY    <href=>/api/sets/{set_id}/update
+  api_sets_delete            DELETE     ANY      ANY    <href=>/api/sets/{set_id}/delete
+  api_tasks_create           POST       ANY      ANY    <href=>/api/sets/{set_id}/tasks/create
+  api_tasks                  GET        ANY      ANY    <href=>/api/sets/{set_id}/tasks              ->  puste
+  api_tasks_update           PUT        ANY      ANY    <href=>/api/sets/{set_id}/tasks/{task_id}/update
+  api_tasks_delete           DELETE     ANY      ANY    <href=>/api/sets/{set_id}/tasks/{task_id}/delete
