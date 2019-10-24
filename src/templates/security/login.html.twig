@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+{% block bodyClass %}
+    todo-body
+{% endblock %}
+{% block title %}Log in
+{% endblock %}
+
+{% block body %}
+    <section class="d-flex login-home">
+        <div class="container-fluid align-self-center">
+
+            <div class="row">
+                <header class="col-md-12">
+                    <div class="inner d-flex justify-content-center">
+                        <h3 class="text-white">Login</h3>
+                    </div>
+                </header>
+                <div class="col-12 d-flex flex-column justify-content-center text-center">
+                    <div class="col-md-3 col-12 col-sm-4 mx-auto">
+                        <form method="post">
+                            {% if error %}
+                                <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+                            {% endif %}
+
+                            <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+                            <div class="form-group">
+                                <label class="sr-only" for="inputUsername">Username</label>
+                                <input type="text" value="{{ last_username }}" name="username" id="inputUsername" class="form-control" placeholder="Username" required autofocus></div>
+                            <div class="form-group">
+                                <label class="sr-only" for="inputPassword">Password</label>
+                                <input class="form-control" id="inputPassword" name="password" placeholder="Password" required type="password"></div>
+
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                            <button class="btn btn-lg btn-primary my-3" type="submit">
+                                Sign in
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    {% endblock %}

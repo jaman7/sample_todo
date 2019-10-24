@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+{% block bodyClass %}todo-body
+{% endblock %}
+{% block title %}TODO Manager
+{% endblock %}
+
+{% block body %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+
+            <img alt="TODO Manager" class="img-fluid img-icon-todo" src="img/todo.png">
+            <a class="navbar-brand" href="#">TODO manager</a>
+            <button aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbarNavDropdown" data-toggle="collapse" type="button">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+
+                <ul class="navbar-nav m-auto" id="addlist">
+                    <li class="nav-item">
+                        <a aria-disabled="true" class="nav-link disabled todo-user-color" href="#">
+                            <label class="form-check-label">Add list</label>
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a aria-disabled="true" class="nav-link disabled todo-user-color" href="#">
+                            <i class="fa fa-user"></i>
+                            {{ app.user.username }}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link todo-user-color nav-logout" href="logout">
+                            <i class="fa fa-sign-out-alt"></i>
+                            logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <section class="py-2" id="root"></section>
+{% endblock %}

@@ -1,0 +1,27 @@
+{%# error404.html.twig #%}
+{% extends 'base.html.twig' %}
+{% block bodyClass %}
+    text-center login-page
+{% endblock %}
+{% block htmlClass %}
+    page-html
+{% endblock %}
+{% block title %}TODO app
+{% endblock %}
+
+{% block body %}
+    <section class="d-flex todo-home">
+        <div class="container-fluid align-self-center">
+            <div class="row">
+                <header class="col-md-12">
+                    <div class="inner d-flex justify-content-center">
+                        <h3 class="masthead-brand">error 404.</h3>
+                        <p class="lead">
+                            <a class="btn btn-lg btn-success font-weight-bold" href="dashboard">dashboard</a>
+                        </p>
+                    </div>
+                </header>
+            </div>
+        </div>
+    </div>
+</section>{% endblock %}

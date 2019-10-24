@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+{% block bodyClass %}text-center login-page
+{% endblock %}
+{% block htmlClass %}page-html
+{% endblock %}
+{% block title %}TODO app
+{% endblock %}
+
+{% block body %}
+    <section class="d-flex todo-home">
+        <div class="container-fluid align-self-center">
+            <div class="row">
+                <header class="col-md-12">
+                    <div class="inner d-flex justify-content-center">
+                        <h3 class="masthead-brand">Witamy na naszym testowym projekcie.</h3>
+                    </div>
+                </header>
+                <div class="col-12">
+                    <div class="d-flex flex-column justify-content-center text-center">
+                        <h1>TODO app</h1>
+                        <div class="d-flex justify-content-center">
+                            <img alt="TODO" class="img-fluid img-home mr-3 p-1" src="img/todo.png">
+                            <img alt="React" class="img-fluid img-home p-1" src="img/react.svg">
+                        </div>
+                        <p class="lead">Aby się zalogować proszę kliknąć poniższy przycisk.</p>
+                        <p class="lead">
+                            <a class="btn btn-lg btn-success font-weight-bold" href="login">Zaloguj</a>
+                        </p>
+                    </div>
+                </div>
+                <footer class="col-md-12">
+                    <p class="lead">Dane logowania:<br><span>login -
+                            <strong>bob</strong><br>hasło -
+                            <strong>1234</strong>
+                        </span>
+                    </p>
+                    <p class="small">W aplikacji dwukrotne kliknięcie umożliwia edycję elementu.<br>Aplikacja w języku angielskim.</p>
+                    <p class="text-center lead">Projekt - 2019.</p>
+                </footer>
+            </div>
+        </div>
+    </div>
+</section>{% endblock %}

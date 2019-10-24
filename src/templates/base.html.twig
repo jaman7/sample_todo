@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html class="{%block htmlClass %}{% endblock %}">
+    <head>
+        <meta charset="UTF-8">
+        <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
+        <title>
+            {% block title %}Welcome!
+            {% endblock %}
+        </title>
+        {% block stylesheets %}{% endblock %}
+        {% block head_css %}
+            <link href="css/style.min.css" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/css?family=Lato:400,400i,700,700i%7CMontserrat:400,400i,500,500i,600,600i,700&amp;subset=latin-ext" rel="stylesheet">
+        {% endblock %}
+        <link href="favicon.ico" rel="shortcut icon">
+    </head>
+
+    <body class="{%block bodyClass %}{% endblock %}"> {% block body %}{% endblock %}
+        {% block javascripts %}
+            <script data-main="js/main" src="js/jsvendor/require.js"></script>
+        {% endblock %}
+    </body>
+</html>
