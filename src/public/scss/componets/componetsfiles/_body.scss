@@ -1,0 +1,14 @@
+html {
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+}
+
+body {
+	font-family: $fontm;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.todo-body {
+	background-color: $bg-color;
+}

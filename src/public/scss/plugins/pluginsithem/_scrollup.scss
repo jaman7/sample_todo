@@ -1,0 +1,29 @@
+//* Scrool To top */
+.scroll-to-top {
+	position: fixed;
+	right: 15px;
+	bottom: 45px;
+	display: none;
+	width: 40px;
+	height: 40px;
+	text-align: center;
+	color: white;
+	background: rgba($sitecolor, 0.3);
+	line-height: 35px;
+	z-index: 1600;
+}
+
+.scroll-to-top:focus,
+.scroll-to-top:hover {
+	color: white;
+}
+
+.scroll-to-top:hover {
+	background: rgba($sitecolor, 0.5);
+}
+
+.scroll-to-top i {
+	font-weight: 800;
+}
+
+//* End Scroll To top */
