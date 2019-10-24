@@ -1,5 +1,25 @@
-# Welcome to GitHub Desktop!
+# TODO manager
 
-This is your README. READMEs are where you can communicate what your project is and how to use it.
+TODO manager React/Mobx, Symfony App.
 
-Write your name on line 6, save it, and then head back to GitHub Desktop.
+## Installation
+
+Use git clone.
+
+```bash
+git clone
+npm install
+```
+
+## Usage
+
+```npm
+run tunnel
+gulp
+```
+
+## Contributing
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+## License
+[MIT](https://choosealicense.com/licenses/mit/)
