@@ -1,93 +1,81 @@
-// utility base
 const gulp = require('gulp');
 const browserSync = require('browser-sync').create();
-const prettyError = require('gulp-prettyerror');
-const plumber = require('gulp-plumber');
-// var gutil = require('gulp-util');
-const notify = require('gulp-notify');
-const size = require('gulp-size');
-const del = require('del');
-const shell = require('gulp-shell');
-const rename = require('gulp-rename');
-const flog = require('fancy-log');
-const c = require('ansi-colors');
-// sass
 const sass = require('gulp-sass');
-// sass mixins
-const bourbon = require('bourbon').includePaths;
-const neat = require('bourbon-neat').includePaths;
-// css sourcemaps
+sass.compiler = require('node-sass');
 const sourcemaps = require('gulp-sourcemaps');
-const purgeSourcemaps = require('gulp-purge-sourcemaps');
 const autoprefixer = require('autoprefixer');
-const cleanCSS = require('gulp-clean-css');
-const postcss = require('gulp-postcss');
-const sorting = require('postcss-sorting');
-const postcssMergeRules = require('postcss-merge-rules');
-const flexbugsFixes = require('postcss-flexbugs-fixes');
-// js
-const jshint = require('gulp-jshint');
-const stripDebug = require('gulp-strip-debug');
-// js css utility min
-const uglify = require('gulp-uglify');
-const concat = require('gulp-concat');
-const rjs = require('requirejs');
-// image utility
 const imagemin = require('gulp-imagemin');
 const pngquant = require('imagemin-pngquant');
 const JpegRecompress = require('imagemin-jpeg-recompress');
 const gifsicle = require('imagemin-gifsicle');
 const svgo = require('imagemin-svgo');
-const tinypng = require('gulp-tinypng-nokey');
-// html utility
-const htmlReaplce = require('gulp-html-replace');
-const htmlMin = require('gulp-htmlmin');
-const htmlhint = require('gulp-htmlhint');
-// json
-const jsonlint = require('gulp-jsonlint');
-// revision utility
+const size = require('gulp-size');
+const del = require('del');
+const jshint = require('gulp-jshint');
+const notify = require('gulp-notify');
+const bourbon = require('bourbon').includePaths;
+const neat = require('bourbon-neat').includePaths;
+const prettyError = require('gulp-prettyerror');
+const plumber = require('gulp-plumber');
+const fancylog = require('fancy-log');
+const c = require('ansi-colors');
+const beeper = require('beeper');
+const postcss = require('gulp-postcss');
+const sorting = require('postcss-sorting');
+const stripDebug = require('gulp-strip-debug');
+const postcssMergeRules = require('postcss-merge-rules');
+const flexbugsFixes = require('postcss-flexbugs-fixes');
+const rjs = require('requirejs');
 const rev = require('gulp-rev');
 const revReplace = require('gulp-rev-replace');
+const rename = require('gulp-rename');
+const jsonlint = require('gulp-jsonlint');
 const insertLines = require('gulp-insert-lines');
-// const moment = require('moment');
-// const header = require('gulp-header');
-// php Beautify
+const moment = require('moment');
+const header = require('gulp-header');
 const phpcs = require('gulp-phpcs');
-// react babel
+const shell = require('gulp-shell');
+
+const uglify = require('gulp-uglify');
+const concat = require('gulp-concat');
 const eslint = require('gulp-eslint');
 const babel = require('gulp-babel');
-// const newer = require('gulp-newer');
 const webpack = require('webpack');
 const webpackstream = require('webpack-stream');
 const named = require('vinyl-named');
 const through = require('through2');
+
+ const htmlReaplce = require('gulp-html-replace');
+const htmlMin = require('gulp-htmlmin');
+const htmlhint = require('gulp-htmlhint');
+const purgeSourcemaps = require('gulp-purge-sourcemaps');
+const cleanCSS = require('gulp-clean-css');
+const webpackconfig = require('./webpack.config.js');
+const zensorting = require('./zen.json');
+const pkg = require('./package.json');
+// const newer = require('gulp-newer');
 // twig
 // const twig = require('gulp-twig');
 
-const webpackconfig = require('./webpack.config.js');
-// configs
-const pkg = require('./package.json');
-const zensorting = require('./zen.json');
-
 // =====================================================================//
 
-// const banner = [
-// 	'/**',
-// 	' * @project        <%= pkg.name %>',
-// 	' * @author         <%= pkg.author %>',
-// 	` * @build          ${moment().format('llll')} ET`,
-// 	` * @copyright      Copyright (c) ${moment().format('YYYY')}, <%= pkg.copyright %>`,
-// 	' *',
-// 	' */',
-// 	''
-// ].join('\n');
+const banner = [
+	'/**',
+	' * @project        <%= pkg.name %>',
+	' * @author         <%= pkg.author %>',
+	` * @build          ${moment().format('llll')} ET`,
+	` * @copyright      Copyright (c) ${moment().format('YYYY')}, <%= pkg.copyright %>`,
+	' *',
+	' */',
+	''
+].join('\n');
 
 // dirs
 const dist = './dist/';
 const src = './src/';
 const mapout = '/';
 const distphpdir = `${dist}inc/`;
-const localurl = 'sample_todo';
+const localurl = pkg.repository.directory;
 
 // src dist config
 const config = {
@@ -167,11 +155,26 @@ const rjsconfig = {
 // =========================funckcje============================================//
 
 // =========================func jsonlint============================================//
-const jsonlintreporter = file => {
-	flog(`File ${file.path} is not valid JSON.`);
+
+//= ========================func log============================================//
+const log = msg => {
+	if (typeof msg === 'object') {
+		// eslint-disable-next-line no-restricted-syntax
+		for (const item in msg) {
+			// eslint-disable-next-line no-prototype-builtins
+			if (msg.hasOwnProperty(item)) {
+				fancylog(c.blue(msg[item]));
+			}
+		}
+	} else {
+		fancylog(c.white(msg));
+	}
 };
 
-// =========================func error============================================//
+const jsonlintreporter = file => {
+	log(`File ${file.path} is not valid JSON.`);
+};
+
 const reportError = error => {
 	const lineNumber = error.lineNumber ? `LINE ${error.lineNumber} -- ` : '';
 	notify({
@@ -179,6 +182,7 @@ const reportError = error => {
 		message: `${lineNumber}See console.`,
 		sound: 'Sosumi' // See: https://github.com/mikaelbr/node-notifier#all-notification-options-with-their-defaults
 	}).write(error);
+	beeper();
 	let report = '';
 	const chalk = c.white.bgRed;
 	report += `${chalk('TASK:')} [${error.plugin}]\n`;
@@ -189,13 +193,13 @@ const reportError = error => {
 	if (error.fileName) {
 		report += `${chalk('FILE:')} ${error.fileName}\n`;
 	}
-	flog.error(report);
-	this.emit('end');
+	console.error(report);
+	// this.emit('end');
 };
 
-// ==========================func plumber error conf==============================//
+//= =========================func plumber error conf==============================//
 const onError = error => {
-	flog(c.red(error));
+	fancylog.error(c.red(error));
 	this.emit('end');
 };
 
@@ -214,17 +218,21 @@ const sortOptions = [
 	postcssMergeRules,
 	autoprefixer({
 		overrideBrowserslist: [
+			'last 1 version',
 			'> 1%',
-			'last 1 major version',
+			'maintained node versions',
 			'not dead',
 			'Chrome >= 45',
+			'ChromeAndroid >= 61',
 			'Firefox >= 38',
+			'FirefoxAndroid >= 56',
 			'Edge >= 12',
-			'Explorer >= 10',
+			'IE >= 9',
 			'iOS >= 9',
 			'Safari >= 9',
 			'Android >= 4',
-			'Opera >= 30'
+			'Opera >= 30',
+			'OperaMobile >= 48'
 		],
 		cascade: true
 	}),
@@ -270,102 +278,54 @@ const serve = cb => {
 		// server: src,
 		notify: false,
 		browser: 'Chrome',
-		proxy: `localhost/${localurl}/src/public`
+		proxy: `localhost/${localurl}/src/public`,
+		ws: true
 	});
 	cb();
 };
 exports.serve = serve;
 // ================================SASS=========================================//
-// function sassCompile(cb) {
-// 	let s = size();
-// 	flog('-> Compile SASS Styles');
-// 	return gulp
-// 		.src(config.scssin)
-// 		.pipe(
-// 			plumber({
-// 				errorHandler: onError
-// 			})
-// 		)
-// 		.pipe(prettyError())
-// 		.pipe(sourcemaps.init())
-// 		.pipe(sass(sassOptions).on('error', reportError))
-// 		.pipe(postcss(sortOptions))
-// 		.pipe(s)
-// 		.pipe(
-// 			header(banner, {
-// 				pkg: pkg
-// 			})
-// 		)
-// 		.pipe(sourcemaps.write(mapout))
-// 		.pipe(gulp.dest(config.cssout))
-// 		.pipe(browserSync.stream())
-// 		.pipe(
-// 			notify({
-// 				onLast: true,
-// 				sound: 'Sosumi',
-// 				message: function() {
-// 					return 'CSS opty: <%= file.relative %> ' + s.prettySize;
-// 				}
-// 			})
-// 		);
-// 	cb();
-// }
-
 const sassCompile = cb => {
 	const s = size();
-	flog('-> Compile SASS Styles');
-	return (
-		gulp
-			.src(config.scssin)
-			.pipe(
-				plumber({
-					errorHandler: onError
-				})
-			)
-			.pipe(prettyError())
-			// .pipe(sourcemaps.init())
-			.pipe(sass(sassOptions).on('error', reportError))
-			.pipe(postcss(sortOptions))
-			.pipe(concat(config.cssnamemin))
-			.pipe(
-				cleanCSS(
-					{
-						aggressiveMerging: false,
-						debug: true,
-						compatibility: 'ie9',
-						level: {
-							1: {
-								specialComments: 0
-							}
-						}
-					},
-					details => {
-						flog(`${details.name}: ${details.stats.originalSize}`);
-						flog(`${details.name}: ${details.stats.minifiedSize}`);
-					}
-				)
-			)
-			.pipe(s)
-			// .pipe(sourcemaps.write(mapout))
-			.pipe(gulp.dest(config.cssout))
-			.pipe(browserSync.stream())
-			.pipe(
-				notify({
-					onLast: true,
-					message() {
-						return `CSS opty: <%= file.relative %> ${s.prettySize}`;
-					}
-				})
-			)
-			.on('end', cb)
-	);
+	log('-> Compile SASS Styles');
+	return gulp
+		.src(config.scssin)
+		.pipe(
+			plumber({
+				errorHandler: onError
+			})
+		)
+		.pipe(prettyError())
+		.pipe(sourcemaps.init())
+		.pipe(sass(sassOptions).on('error', reportError))
+		.pipe(postcss(sortOptions))
+		.pipe(s)
+		.pipe(
+			header(banner, {
+				pkg
+			})
+		)
+		.pipe(sourcemaps.write(mapout))
+
+		.pipe(gulp.dest(config.cssout))
+		.pipe(browserSync.stream())
+		.pipe(
+			notify({
+				onLast: true,
+				message() {
+					return `CSS opty: <%= file.relative %> ${s.prettySize}`;
+				},
+				sound: false
+			})
+		)
+		.on('end', cb);
 };
 exports.sassCompile = sassCompile;
 
 // =========================Dist min.css===============================//
 const css = cb => {
 	const s = size();
-	flog('-> css minify');
+	log('-> css minify');
 	return gulp
 		.src(config.cssin)
 		.pipe(
@@ -384,8 +344,8 @@ const css = cb => {
 					keepSpecialComments: 0
 				},
 				details => {
-					flog(`${details.name}: ${details.stats.originalSize}`);
-					flog(`${details.name}: ${details.stats.minifiedSize}`);
+					log(`${details.name}: ${details.stats.originalSize}`);
+					log(`${details.name}: ${details.stats.minifiedSize}`);
 				}
 			)
 		)
@@ -397,7 +357,8 @@ const css = cb => {
 				onLast: true,
 				message() {
 					return `CSS min: <%= file.relative %> ${s.prettySize}`;
-				}
+				},
+				sound: false
 			})
 		)
 		.on('end', cb);
@@ -407,7 +368,7 @@ exports.css = css;
 // ================================jshint=========================================//
 const jslint = cb => {
 	const s = size();
-	flog('-> sprawdzanie js');
+	log('-> sprawdzanie js');
 	return gulp
 		.src(config.jsin)
 		.pipe(
@@ -428,7 +389,8 @@ const jslint = cb => {
 				onLast: true,
 				message() {
 					return `JS check: <%= file.relative %> ${s.prettySize}`;
-				}
+				},
+				sound: false
 			})
 		)
 		.on('end', cb);
@@ -437,7 +399,7 @@ exports.jslint = jslint;
 
 const jsx = cb => {
 	const s = size();
-	flog('-> sprawdzanie jsx');
+	log('-> sprawdzanie jsx');
 	return gulp
 		.src(config.jsxin)
 		.pipe(
@@ -457,10 +419,10 @@ const jsx = cb => {
 		.pipe(
 			notify({
 				onLast: true,
-				sound: 'Sosumi',
 				message() {
 					return `es5 js opty: <%= file.relative %> ${s.prettySize}`;
-				}
+				},
+				sound: false
 			})
 		)
 		.on('end', cb);
@@ -469,7 +431,7 @@ exports.jsx = jsx;
 
 const jsx2 = cb => {
 	const s = size();
-	flog('-> sprawdzanie jsx');
+	log('-> sprawdzanie jsx');
 	return gulp
 		.src(config.jsxin)
 		.pipe(
@@ -496,10 +458,10 @@ const jsx2 = cb => {
 		.pipe(
 			notify({
 				onLast: true,
-				sound: 'Sosumi',
 				message() {
 					return `es5 js opty: <%= file.relative %> ${s.prettySize}`;
-				}
+				},
+				sound: false
 			})
 		)
 		.on('end', cb);
@@ -509,24 +471,24 @@ exports.jsx2 = jsx2;
 // ================================jsonlint=========================================//
 const jsonlinter = cb => {
 	const s = size();
-	flog('-> json check');
-	gulp.src(config.jsonin)
+	log('-> json check');
+	return gulp
+		.src(config.jsonin)
 		.pipe(
 			plumber({
 				errorHandler: onError
 			})
 		)
 		.pipe(jsonlint())
-		.pipe(jsonlint.reporter())
 		.pipe(jsonlint.reporter(jsonlintreporter))
 		.pipe(s)
 		.pipe(
 			notify({
 				onLast: true,
-				sound: 'Sosumi',
 				message() {
 					return `JS check: <%= file.relative %> ${s.prettySize}`;
-				}
+				},
+				sound: false
 			})
 		)
 		.on('end', cb);
@@ -536,7 +498,7 @@ exports.jsonlinter = jsonlinter;
 // ================================htmllint=========================================//
 const htmllint = cb => {
 	const s = size();
-	flog('-> html check');
+	log('-> html check');
 	return gulp
 		.src(config.htmlin)
 		.pipe(
@@ -555,10 +517,10 @@ const htmllint = cb => {
 		.pipe(
 			notify({
 				onLast: true,
-				sound: 'Sosumi',
 				message() {
 					return `html check: <%= file.relative %> ${s.prettySize}`;
-				}
+				},
+				sound: false
 			})
 		)
 		.on('end', cb);
@@ -566,7 +528,7 @@ const htmllint = cb => {
 exports.htmllint = htmllint;
 // ================================htmllint=========================================//
 const twiglinter = cb => {
-	flog('-> twig check');
+	log('-> twig check');
 	return gulp
 		.src(config.twig)
 		.pipe(
@@ -580,26 +542,26 @@ exports.twiglinter = twiglinter;
 
 // =========================taski bulid wps + rj.s========================//
 
-// ==============================clean====================================//
+//= =============================clean====================================//
 const clean = cb => {
-	flog('-> Cleaning build folder');
+	log('-> Cleaning build folder');
 	return del([dist], cb);
 };
 exports.clean = clean;
 
 //= ===========================rjsbuild===================================//
 const rjsbuild = cb => {
-	flog('-> requirejs optymizer');
+	log('-> requirejs optymizer');
 	return rjs.optimize(
 		rjsconfig,
-		// eslint-disable-next-line func-names
+
 		buildResponse => {
-			console.log('build response', buildResponse);
+			log('build response', buildResponse);
 			cb();
 		},
-		// eslint-disable-next-line func-names
+
 		error => {
-			console.error('requirejs task failed', JSON.stringify(error));
+			fancylog.error('requirejs task failed', JSON.stringify(error));
 			process.exit(1);
 		},
 		cb
@@ -609,10 +571,10 @@ exports.rjsbuild = rjsbuild;
 
 // ============================clean-image================================//
 const cleanImage = cb => {
-	flog('-> Cleaning img files to preoptymize');
+	log('-> Cleaning img files to preoptymize');
 	del([`${config.imgout}**/**/*.{jpg,jpeg,png,gif}`]).then(
 		paths => {
-			flog(paths);
+			log(paths);
 			cb();
 		},
 		reason => {
@@ -625,7 +587,7 @@ exports.cleanImage = cleanImage;
 const img = cb => {
 	let nSrc = 0;
 	let nDes = 0;
-	flog('-> IMG minify');
+	log('-> IMG minify');
 	return gulp
 		.src(config.imgin)
 		.on('data', () => {
@@ -643,18 +605,27 @@ const img = cb => {
 					gifsicle(),
 					JpegRecompress({
 						progressive: true,
-						max: 80,
+						max: 100,
 						min: 70
 					}),
 					pngquant({
-						quality: [0.7, 0.9]
+						quality: [0.9, 0.99]
 					}),
 					svgo({
 						plugins: [
 							{
 								removeViewBox: false
+							},
+							{
+								removeXMLProcInst: false
+							},
+							{
+								removeDoctype: false
 							}
-						]
+						],
+						js2svg: {
+							pretty: true
+						}
 					})
 				],
 				{
@@ -667,42 +638,17 @@ const img = cb => {
 			nDes += 1;
 		})
 		.on('finish', () => {
-			flog('Results for img');
-			flog('# src files: ', nSrc);
-			flog('# dest files:', nDes);
+			log('Results for img');
+			log('# src files: ', nSrc);
+			log('# dest files:', nDes);
 		})
 		.on('end', cb);
 };
 exports.img = img;
 
-const img2 = cb => {
-	const s = size();
-	flog('-> IMG minify');
-	return gulp
-		.src(config.imgin2)
-		.pipe(
-			plumber({
-				errorHandler: onError
-			})
-		)
-		.pipe(prettyError())
-		.pipe(tinypng())
-		.pipe(s)
-		.pipe(gulp.dest(config.imgout))
-		.pipe(
-			notify({
-				onLast: true,
-				message() {
-					return `IMG min: <%= file.relative %> ${s.prettySize}`;
-				}
-			})
-		)
-		.on('end', cb);
-};
-exports.img2 = img2;
 // ========================rev===================================//
 const revisionsCss = cb => {
-	flog('-> revisions css style');
+	log('-> revisions css style');
 	const s = size();
 	gulp.src([config.diststylefile], { base: dist })
 		.pipe(
@@ -720,7 +666,8 @@ const revisionsCss = cb => {
 				onLast: true,
 				message() {
 					return `php rev: <%= file.relative %> ${s.prettySize}`;
-				}
+				},
+				sound: false
 			})
 		);
 	setTimeout(cb, 1000);
@@ -729,7 +676,7 @@ exports.revisionsCss = revisionsCss;
 
 // ======================revreplace===============================//
 const revreplace = cb => {
-	flog('-> Replace in html to revision css');
+	log('-> Replace in html to revision css');
 	const manifest = gulp.src(config.revmanifestfile);
 	const s = size();
 	gulp.src(config.revhead)
@@ -754,21 +701,22 @@ const revreplace = cb => {
 				extname: '.php'
 			})
 		)
-		.pipe(gulp.dest(distphpdir))
+		.pipe(gulp.dest(config.revhead))
 		.pipe(
 			notify({
 				onLast: true,
 				message() {
 					return `php rev replace: <%= file.relative %> ${s.prettySize}`;
-				}
+				},
+				sound: false
 			})
 		);
 	setTimeout(cb, 1000);
 };
 exports.revreplace = revreplace;
 // ======================add lines to minify html in php output===============================//
-const insertStylesBundle = cb => {
-	flog('-> add lines to minify html in php output');
+const insertMninifyHtmlInPHP = cb => {
+	log('-> add lines to minify html in php output');
 	const s = size();
 	gulp.src(config.distindexphp)
 		.pipe(
@@ -782,12 +730,9 @@ const insertStylesBundle = cb => {
 				extname: '.html'
 			})
 		)
-		.pipe(
-			insertLines({
-				after: /\/\/outminfyhtmls*$/i,
-				lineAfter: 'ob_start("sanitize_output");'
-			})
-		)
+
+		.pipe(insertLines.replace('//outminfyhtml', 'ob_start("sanitize_output");'))
+
 		.pipe(
 			rename({
 				extname: '.php'
@@ -799,15 +744,16 @@ const insertStylesBundle = cb => {
 				onLast: true,
 				message() {
 					return `add lines to minify html in php output: <%= file.relative %> ${s.prettySize}`;
-				}
+				},
+				sound: false
 			})
 		);
 	setTimeout(cb, 100);
 };
-exports.insertStylesBundle = insertStylesBundle;
+exports.insertMninifyHtmlInPHP = insertMninifyHtmlInPHP;
 // ===================clean-dist-map-styles==========================//
 const cleanDistMapStyles = cb => {
-	flog('-> Cleaning unsued files');
+	log('-> Cleaning unsued files');
 	del([
 		config.cleanscssdist,
 		config.cleanscssdistBS,
@@ -817,7 +763,7 @@ const cleanDistMapStyles = cb => {
 		`${config.distcss}*.json`
 	]).then(
 		paths => {
-			flog(paths);
+			log(paths);
 			cb(); // ok
 		},
 		reason => {
@@ -828,10 +774,10 @@ const cleanDistMapStyles = cb => {
 exports.cleanDistMapStyles = cleanDistMapStyles;
 
 const cleanDistAfter = cb => {
-	flog('-> Cleaning unsued files');
+	log('-> Cleaning unsued files');
 	del([`${config.distcss}*.min.css`]).then(
 		paths => {
-			flog(paths);
+			log(paths);
 			cb(); // ok
 		},
 		reason => {
@@ -845,7 +791,7 @@ exports.cleanDistAfter = cleanDistAfter;
 // ============================Dist min.js==================================//
 const buildJS = cb => {
 	const s = size();
-	flog('-> JS minify');
+	log('-> JS minify');
 	return gulp
 		.src(config.jsin)
 		.pipe(
@@ -869,7 +815,8 @@ const buildJS = cb => {
 				onLast: true,
 				message() {
 					return `JS min: <%= file.relative %> ${s.prettySize}`;
-				}
+				},
+				sound: false
 			})
 		)
 		.on('end', cb);
@@ -878,7 +825,7 @@ exports.buildJS = buildJS;
 // ============================Dist min html==================================//
 const html = cb => {
 	const s = size();
-	flog('-> html minfy');
+	log('-> html minfy');
 	return gulp
 		.src(config.htmlin)
 		.pipe(s)
@@ -907,7 +854,8 @@ const html = cb => {
 				onLast: true,
 				message() {
 					return `html min: <%= file.relative %> ${s.prettySize}`;
-				}
+				},
+				sound: false
 			})
 		)
 		.on('end', cb);
@@ -916,7 +864,7 @@ exports.html = html;
 // ============================Dist fonts==================================//
 const fonts = cb => {
 	const s = size();
-	flog('-> font copy dest');
+	log('-> font copy dest');
 	return gulp
 		.src(config.fontin)
 		.pipe(s)
@@ -936,9 +884,9 @@ exports.fonts = fonts;
 // ============================php bioutyfy==================================//
 
 const phpcode = cb => {
-	flog('-> php sniffer');
+	log('-> php sniffer');
 	return gulp
-		.src(['src/src/', '!src/vendor/'])
+		.src(['src/', '!src/vendor/'])
 		.pipe(
 			phpcs({
 				bin: `${config.vendorBin}phpcs`,
@@ -952,14 +900,23 @@ const phpcode = cb => {
 };
 exports.phpcode = phpcode;
 
-gulp.task(
-	'phpcbf',
-	shell.task([
-		`"${config.vendorBin}phpcbf" --standard=PSR2 --extensions=php --ignore=${config.phpexclude} ` +
-			`src/src/`
-	])
-);
-gulp.task('PHP-PSR2', gulp.series(phpcode, 'phpcbf'));
+const phpcbf = cb => {
+	log('-> phpcbf sniffer');
+	return gulp
+		.src(['src/', '!src/vendor/'])
+		.pipe(
+			shell(
+				[
+					`"${config.vendorBin}phpcbf" --standard=PSR2 --runtime-set ignore_warnings_on_exit 1 --extensions=php --ignore=${config.phpexclude} ` +
+						`src/`
+					// 'src/'
+				],
+				{ ignoreErrors: true }
+			)
+		)
+		.on('end', cb);
+};
+exports.phpcbf = phpcbf;
 
 // ============================rundist==================================//
 const rundist = cb => {
@@ -974,22 +931,22 @@ const rundist = cb => {
 exports.rundist = rundist;
 // ============================helper==================================//
 const help = cb => {
-	flog('---------------------------------------------------------------------');
-	flog(`${pkg.name} ${pkg.version} ${config.environment} build`);
-	flog('---------------------------------------------------------------------');
-	flog(`${'browser serve url: localhost/'}${localurl}/src`);
-	flog('---------------------------------------------------------------------');
-	flog('                Usage: gulp [command]                                ');
-	flog('     The commands for the task runner are the following.             ');
-	flog('---------------------------------------------------------------------');
-	flog('                  gulp: Compile sass linter js, html                 ');
-	flog('          gulp prodrjs: buld for requrejs                            ');
-	flog('             gulp prod: buld all for no AMD                          ');
-	flog('            gulp prod2: buld for requrejs no compress img            ');
-	flog('             gulp sass: Compile the Sass styles                      ');
-	flog('            gulp clean: Removes all the compiled files on ./dist     ');
-	flog('          gulp rundist: run dystrybution version                     ');
-	flog('---------------------------------------------------------------------');
+	log('---------------------------------------------------------------------');
+	log(`${pkg.name} ${pkg.version} ${config.environment} build`);
+	log('---------------------------------------------------------------------');
+	log(`${'browser serve url: localhost/'}${localurl}/src`);
+	log('---------------------------------------------------------------------');
+	log('                Usage: gulp [command]                                ');
+	log('     The commands for the task runner are the following.             ');
+	log('---------------------------------------------------------------------');
+	log('                  gulp: Compile sass linter js, html                 ');
+	log('          gulp prodrjs: buld for requrejs                            ');
+	log('             gulp prod: buld all for no AMD                          ');
+	log('            gulp prod2: buld for requrejs no compress img            ');
+	log('             gulp sass: Compile the Sass styles                      ');
+	log('            gulp clean: Removes all the compiled files on ./dist     ');
+	log('          gulp rundist: run dystrybution version                     ');
+	log('---------------------------------------------------------------------');
 	cb();
 };
 exports.help = help;
@@ -1005,13 +962,13 @@ const watchChange = cb => {
 		gulp.series(twiglinter, reload)
 	);
 	twigcs.on('change', path => {
-		console.log(`File ${path} was changed running tasks...`);
+		log(`File ${path} was changed running tasks...`);
 	});
 	twigcs.on('add', path => {
-		console.log(`File ${path} was added`);
+		log(`File ${path} was added`);
 	});
 	twigcs.on('unlink', path => {
-		console.log(`File ${path} was removed`);
+		log(`File ${path} was removed`);
 	});
 
 	// watch php
@@ -1019,13 +976,13 @@ const watchChange = cb => {
 	//     interval: 750
 	// }, gulp.series('phpcbf', phpcode, reload));
 	// php.on('change', (path, stats) => {
-	//     console.log('File ' + path + ' was changed running tasks...');
+	//     log('File ' + path + ' was changed running tasks...');
 	// });
 	// php.on('add', (path, stats) => {
-	//     console.log('File ' + path + ' was added');
+	//     log('File ' + path + ' was added');
 	// });
 	// php.on('unlink', (path) => {
-	//     console.log('File ' + path + ' was removed');
+	//     log('File ' + path + ' was removed');
 	// });
 
 	// watch react
@@ -1037,13 +994,13 @@ const watchChange = cb => {
 		gulp.series(jsx2, reload)
 	);
 	react.on('change', path => {
-		console.log(`File ${path} was changed running tasks...`);
+		log(`File ${path} was changed running tasks...`);
 	});
 	react.on('add', path => {
-		console.log(`File ${path} was added`);
+		log(`File ${path} was added`);
 	});
 	react.on('unlink', path => {
-		console.log(`File ${path} was removed`);
+		log(`File ${path} was removed`);
 	});
 
 	// watch js
@@ -1055,13 +1012,13 @@ const watchChange = cb => {
 		gulp.series(jslint, reload)
 	);
 	js.on('change', path => {
-		console.log(`File ${path} was changed running tasks...`);
+		log(`File ${path} was changed running tasks...`);
 	});
 	js.on('add', path => {
-		console.log(`File ${path} was added`);
+		log(`File ${path} was added`);
 	});
 	js.on('unlink', path => {
-		console.log(`File ${path} was removed`);
+		log(`File ${path} was removed`);
 	});
 
 	// watch sass
@@ -1073,13 +1030,13 @@ const watchChange = cb => {
 		gulp.series(sassCompile, reload)
 	);
 	scss.on('change', path => {
-		console.log(`File ${path} was changed running tasks...`);
+		log(`File ${path} was changed running tasks...`);
 	});
 	scss.on('add', path => {
-		console.log(`File ${path} was added`);
+		log(`File ${path} was added`);
 	});
 	scss.on('unlink', path => {
-		console.log(`File ${path} was removed`);
+		log(`File ${path} was removed`);
 	});
 
 	// watch json
@@ -1091,13 +1048,13 @@ const watchChange = cb => {
 		gulp.series(jsonlinter, reload)
 	);
 	json.on('change', path => {
-		console.log(`File ${path} was changed running tasks...`);
+		log(`File ${path} was changed running tasks...`);
 	});
 	json.on('add', path => {
-		console.log(`File ${path} was added`);
+		log(`File ${path} was added`);
 	});
 	json.on('unlink', path => {
-		console.log(`File ${path} was removed`);
+		log(`File ${path} was removed`);
 	});
 
 	// watch image
@@ -1109,13 +1066,13 @@ const watchChange = cb => {
 		gulp.series(reload)
 	);
 	image.on('change', path => {
-		console.log(`File ${path} was changed running tasks...`);
+		log(`File ${path} was changed running tasks...`);
 	});
 	image.on('add', path => {
-		console.log(`File ${path} was added`);
+		log(`File ${path} was added`);
 	});
 	image.on('unlink', path => {
-		console.log(`File ${path} was removed`);
+		log(`File ${path} was removed`);
 	});
 
 	cb();
@@ -1126,7 +1083,7 @@ exports.watchChange = watchChange;
 const copySrcToDist = cb => {
 	let nSrc = 0;
 	let nDes = 0;
-	flog('-> copy src');
+	log('-> copy src');
 	return gulp
 		.src([`${src}**/*`, `!${src}public/**/*`, `${src}/public/js/`], { dot: true })
 		.on('data', () => {
@@ -1143,16 +1100,16 @@ const copySrcToDist = cb => {
 			nDes += 1;
 		})
 		.on('finish', () => {
-			flog('Results for FILES');
-			flog('# src files: ', nSrc);
-			flog('# dest files:', nDes);
+			log('Results for FILES');
+			log('# src files: ', nSrc);
+			log('# dest files:', nDes);
 		})
 		.on('end', cb);
 };
 exports.copySrcToDist = copySrcToDist;
 // ============================callback==================================//
 const callback = cb => {
-	flog('-> build dist');
+	log('-> build dist');
 	cb();
 };
 exports.callback = callback;
@@ -1167,11 +1124,11 @@ const prodrjs = gulp.series(
 	clean,
 	rjsbuild,
 	cleanImage,
-	img2,
+	img,
 	revisionsCss,
 	revreplace,
 	cleanDistMapStyles,
-	insertStylesBundle,
+	insertMninifyHtmlInPHP,
 	cleanDistAfter,
 	callback
 );
@@ -1180,12 +1137,12 @@ exports.prodrjs = prodrjs;
 const prod2 = gulp.series(
 	clean,
 	rjsbuild,
-	cleanImage,
-	img,
+	// cleanImage,
+	// img,
 	revisionsCss,
 	revreplace,
 	cleanDistMapStyles,
-	insertStylesBundle,
+	insertMninifyHtmlInPHP,
 	cleanDistAfter,
 	callback
 );

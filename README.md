@@ -13,7 +13,8 @@ npm install
 
 ## Usage
 
-```
+```npm
+run tunnel
 gulp
 ```
 
