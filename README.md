@@ -11,10 +11,9 @@ git clone
 npm install
 ```
 
-## Usage
+## Usage run
 
-```npm
-run tunnel
+```
 gulp
 ```
 
